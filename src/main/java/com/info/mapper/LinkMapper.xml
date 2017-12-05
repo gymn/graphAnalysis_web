@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.info.dao.LinkDao">
+    <!-- 根据权重阈值获取连边 -->
+    <select id="getLinksOnThreshold" resultType="com.info.model.Link" statementType="STATEMENT">
+        select source,target from ${tableName} where weight &gt; ${threshold}
+    </select>
+
+    <!-- 获取权重最大值 -->
+    <select id="getMaxWeight" resultType="Double" statementType="STATEMENT">
+        SELECT max(weight) FROM ${tableName}
+    </select>
+
+    <!-- 获取权重最小值 -->
+    <select id="getMinWeight" resultType="Double" statementType="STATEMENT">
+        SELECT min(weight) FROM ${tableName}
+    </select>
+
+    <!-- 获取所有连边 -->
+    <select id="getLinkList" resultType="com.info.model.Link" statementType="STATEMENT">
+        SELECT source,target from ${tableName}
+    </select>
+</mapper>
