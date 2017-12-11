@@ -16,9 +16,13 @@
     <context:component-scan base-package="com.info.service"/>
     <context:component-scan base-package="com.info.utils"/>
     <!-- 引入配置文件 -->
-    <bean id="propertyConfigurer"
-          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-        <property name="location" value="classpath:jdbc.properties" />
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:jdbc.properties</value>
+                <value>classpath:application.properties</value>
+            </list>
+        </property>
     </bean>
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="${driver}"/>
@@ -54,4 +58,12 @@
         <property name="dataSource" ref="dataSource"/>
     </bean>
 
+    <bean id="appConfig" class="com.info.utils.AppConfig">
+        <property name="sparkHome" value="${spark.app.homepath}"/>
+        <property name="appResource" value="${spark.app.location}"/>
+        <property name="masterUrl" value="${spark.app.master}"/>
+        <property name="jdbcDriver" value="${spark.app.jdbcDriver}"/>
+        <property name="sparkOutPutPath" value="${spark.app.output}"/>
+        <property name="sparkErrorPath" value="${spark.app.error}"/>
+    </bean>
 </beans>

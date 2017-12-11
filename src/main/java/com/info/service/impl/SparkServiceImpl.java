@@ -1,35 +1,44 @@
 package com.info.service.impl;
 
 import com.info.service.SparkService;
-import org.apache.spark.sql.SparkSession;
+import com.info.utils.AppConfig;
+import com.info.utils.StreamProcessorRunnable;
+import org.apache.spark.launcher.SparkLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Properties;
+import java.io.IOException;
 
 @Service
 public class SparkServiceImpl implements SparkService {
-    private static String master = "local[*]";
-    private static SparkSession spark;
+    @Autowired
+    private AppConfig appConfig;
 
-    private SparkSession getSparkSession(){
-        if(spark==null){
-            synchronized (SparkServiceImpl.class){
-                if(spark==null){
-                    spark = SparkSession.builder().master(master).getOrCreate();
-                }
-            }
+    @Override
+    public Integer invokeSparkJob(String mainClass, String[] args) {
+        SparkLauncher launcher = new SparkLauncher()
+                .addSparkArg("--jars",appConfig.jdbcDriver)
+                .addSparkArg("--driver-class-path",appConfig.jdbcDriver)
+                .setSparkHome(appConfig.sparkHome)
+                .setAppResource(appConfig.appResource)
+                .setMaster(appConfig.masterUrl)
+                .setMainClass(mainClass)
+                .addAppArgs(args);
+        try {
+            Process process = launcher.launch();
+            StreamProcessorRunnable inputStreamProcessor = new StreamProcessorRunnable(process.getInputStream(),appConfig.sparkOutPutPath);
+            StreamProcessorRunnable errorStreamProcessor = new StreamProcessorRunnable(process.getErrorStream(),appConfig.sparkErrorPath);
+            new Thread(inputStreamProcessor).start();
+            new Thread(errorStreamProcessor).start();
+
+            int existCode = process.waitFor();
+            System.out.println(existCode);
+            return existCode;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-        return spark;
-    }
-
-    @Override
-    public void invokeTLJob(Properties algorithmProperties) {
-        SparkSession spark = this.getSparkSession();
-
-    }
-
-    @Override
-    public void invokeLCJob(Properties algorithmProperties) {
-
+        return -1;
     }
 }

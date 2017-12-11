@@ -6,7 +6,7 @@
 <mapper namespace="com.info.dao.LinkDao">
     <!-- 根据权重阈值获取连边 -->
     <select id="getLinksOnThreshold" resultType="com.info.model.Link" statementType="STATEMENT">
-        select source,target from ${tableName} where weight &gt; ${threshold}
+        select source,target,weight from ${tableName} where weight &gt; ${threshold}
     </select>
 
     <!-- 获取权重最大值 -->
@@ -21,6 +21,6 @@
 
     <!-- 获取所有连边 -->
     <select id="getLinkList" resultType="com.info.model.Link" statementType="STATEMENT">
-        SELECT source,target from ${tableName}
+        SELECT source,target,weight from ${tableName}
     </select>
 </mapper>

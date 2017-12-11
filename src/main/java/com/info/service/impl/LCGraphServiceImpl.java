@@ -33,9 +33,11 @@ public class LCGraphServiceImpl implements LCGraphService {
     @Override
     public List<Node> getNodesByType(LCNodeType type) {
         if(type==LCNodeType.IN || type==LCNodeType.OUT) {
+            System.out.println("获取部分节点-------------------------------------------");
             return nodeDao.getNodesByType(nodeTableName, type.getTypeCode());
         }
         else {
+            System.out.println("获取所有节点----------------------------------------------");
             return nodeDao.getNodeList(nodeTableName);
         }
     }

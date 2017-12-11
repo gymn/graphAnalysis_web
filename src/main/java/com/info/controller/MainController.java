@@ -5,34 +5,19 @@ import com.info.model.Graph;
 import com.info.model.LCNodeType;
 import com.info.service.LCGraphService;
 import com.info.service.TLGraphService;
-import com.info.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-
 @Controller
 @RequestMapping("file")
-public class FileController {
-    @Autowired
-    FileUtil fileUtil;
-
+public class MainController {
     @Autowired
     LCGraphService lcGraphService;
 
     @Autowired
     TLGraphService tlGraphService;
-
-    @RequestMapping("/upload")
-    @ResponseBody
-    public String springUpload(HttpServletRequest request) throws IllegalStateException, IOException
-    {
-        fileUtil.upload(request);
-        return "File upload success!";
-    }
 
     @RequestMapping("/json/tl")
     @ResponseBody
@@ -43,11 +28,23 @@ public class FileController {
         return JSON.toJSONString(graph);
     }
 
+    /**
+     * 获取局部社团挖掘的结果
+     * @param nodeType ：in:特征节点，out:非特征节点，all:所有节点
+     * @return
+     */
     @RequestMapping("/json/lc")
     @ResponseBody
-    public String getLCGraphJson(String nodeType){
+    public String getLCGraphJson(String nodeType, String graphType){
         Graph graph = lcGraphService.getGraph(LCNodeType.valueOf(nodeType.toUpperCase()));
+        graph.setType(graphType);
         System.out.println(JSON.toJSONString(graph));
         return JSON.toJSONString(graph);
+    }
+
+    @RequestMapping("/maxWeight")
+    @ResponseBody
+    public Integer getMaxWeight(){
+        return tlGraphService.getMaxWeight().intValue()+1;
     }
 }

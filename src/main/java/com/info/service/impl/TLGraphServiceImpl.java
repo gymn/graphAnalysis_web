@@ -30,7 +30,7 @@ public class TLGraphServiceImpl implements TLGraphService{
 
     @Override
     public List<Link> getLinksOnThreshold(Double threshold) {
-        return linkDao.getLinkList(linkTableName);
+        return linkDao.getLinksOnThreshold(linkTableName,threshold);
     }
 
     @Override
@@ -58,5 +58,10 @@ public class TLGraphServiceImpl implements TLGraphService{
         graph.setLinks(linkList.toArray(new Link[linkList.size()]));
 
         return graph;
+    }
+
+    @Override
+    public Double getMaxWeight() {
+        return linkDao.getMaxWeight(linkTableName);
     }
 }

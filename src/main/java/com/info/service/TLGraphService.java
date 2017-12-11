@@ -29,4 +29,10 @@ public interface TLGraphService {
      * @return
      */
     public Graph getGraph(Double threshold);
+
+    /**
+     * 获取边权重的最大值
+     * @return
+     */
+    public Double getMaxWeight();
 }

@@ -4,7 +4,7 @@ public class Node {
     private String name;
     private Integer value;
     private Integer category;
-    private Integer symbolSize;
+    private Double symbolSize;
 
     public String getName() {
         return name;
@@ -30,11 +30,11 @@ public class Node {
         this.category = category;
     }
 
-    public Integer getSymbolSize() {
+    public Double getSymbolSize() {
         return symbolSize;
     }
 
-    public void setSymbolSize(Integer symbolSize) {
+    public void setSymbolSize(Double symbolSize) {
         this.symbolSize = symbolSize;
     }
 }
