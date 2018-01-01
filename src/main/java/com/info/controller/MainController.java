@@ -24,7 +24,6 @@ public class MainController {
     public String getTLGraphJson(Double threshold, String graphType){
         Graph graph = tlGraphService.getGraph(threshold);
         graph.setType(graphType);
-        System.out.println(JSON.toJSONString(graph));
         return JSON.toJSONString(graph);
     }
 
@@ -38,7 +37,6 @@ public class MainController {
     public String getLCGraphJson(String nodeType, String graphType){
         Graph graph = lcGraphService.getGraph(LCNodeType.valueOf(nodeType.toUpperCase()));
         graph.setType(graphType);
-        System.out.println(JSON.toJSONString(graph));
         return JSON.toJSONString(graph);
     }
 

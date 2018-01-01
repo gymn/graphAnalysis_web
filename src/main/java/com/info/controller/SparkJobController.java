@@ -15,7 +15,6 @@ public class SparkJobController {
     @RequestMapping("/tl")
     @ResponseBody
     public Integer submitLinkPredictionJob(String graphFilePath, String narrowIndex, String numberOfWindows){
-        System.out.println(narrowIndex+"-------"+numberOfWindows);
         String mainClass = "com.hunan.tlp.TlpMain";
         String[] args={graphFilePath,narrowIndex,numberOfWindows};
         return sparkService.invokeSparkJob(mainClass,args);
