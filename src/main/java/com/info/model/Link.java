@@ -28,4 +28,18 @@ public class Link {
     public void setWeight(Double weight) {
         this.weight = weight;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o.getClass().equals(this.getClass())) {
+            Link other = (Link)o;
+            return this.source.equals(other.source) && this.target.equals(other.target);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }
