@@ -21,9 +21,9 @@ public class TestGraphServiceImpl implements CommonGraphService{
     @Autowired
     LinkDao linkDao;
     @Override
-    public Graph getGraph(String tableName) {
-        String nodeTable = tableName+"_node";
-        String linkTable = tableName+"_link";
+    public Graph getTestGraph(String panel) {
+        String nodeTable = panel+"_node_test";
+        String linkTable = panel+"_link_test";
 
         Graph graph = new Graph();
 
@@ -47,7 +47,7 @@ public class TestGraphServiceImpl implements CommonGraphService{
     @Override
     public Metrics getMetricsTLP(Graph graph, Graph testGraph) {
         Link[] links = graph.getLinks();
-        List<Link> allLinkList = linkDao.getLinkList("tl_link");
+        List<Link> allLinkList = linkDao.getLinkList("tlp_link");
         Link[] allLinks = allLinkList.toArray(new Link[allLinkList.size()]);
 
         Link[] testLinks = testGraph.getLinks();

@@ -1,20 +1,18 @@
 package com.info.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.info.model.Data;
-import com.info.model.Graph;
-import com.info.model.LCNodeType;
-import com.info.model.Metrics;
+import com.alibaba.fastjson.JSONObject;
+import com.info.model.*;
+import com.info.service.CommonGraphService;
+import com.info.service.DatasetService;
 import com.info.service.LCGraphService;
 import com.info.service.TLGraphService;
-import com.info.service.impl.TestGraphServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.lang.reflect.Member;
 
 @Controller
 @RequestMapping("file")
@@ -26,13 +24,17 @@ public class MainController {
     TLGraphService tlGraphService;
 
     @Autowired
-    TestGraphServiceImpl testGraphService;
+    CommonGraphService testGraphService;
+
+    @Autowired
+    DatasetService datasetService;
 
     @RequestMapping("/tlp/data")
     @ResponseBody
-    public String getTLGraphJson(Double threshold, String dataset){
+    public String getTLGraphJson(Double threshold){
+        String panel = "tlp";
         Graph graph = tlGraphService.getGraph(threshold);
-        Graph testGraph = testGraphService.getGraph(dataset);
+        Graph testGraph = testGraphService.getTestGraph(panel);
         Metrics metrics = testGraphService.getMetricsTLP(graph,testGraph);
         Data data = new Data(graph,testGraph,metrics);
         return JSON.toJSONString(data);
@@ -45,17 +47,33 @@ public class MainController {
      */
     @RequestMapping("/lcd/data")
     @ResponseBody
-    public String getLCGraphJson(String nodeType, String dataset){
+    public String getLCGraphJson(String nodeType){
+        String panel = "lcd";
         Graph graph = lcGraphService.getGraph(LCNodeType.valueOf(nodeType.toUpperCase()));
-        Graph testGraph = testGraphService.getGraph(dataset);
+        Graph testGraph = testGraphService.getTestGraph(panel);
         Metrics metrics = testGraphService.getMetricsLCD(graph,testGraph);
         Data data = new Data(graph,testGraph,metrics);
         return JSON.toJSONString(data);
     }
 
-    @RequestMapping("/maxWeight")
+    @RequestMapping("/tlp/maxWeight")
     @ResponseBody
     public Integer getMaxWeight(){
         return tlGraphService.getMaxWeight().intValue()+1;
+    }
+
+    @RequestMapping(value = "/dataset/add",method = RequestMethod.POST)
+    @ResponseBody
+    public String addDataset(@RequestBody JSONObject requestJson){
+        String name = requestJson.getString("name");
+        if(datasetService.exist(name)){
+            return "no";
+        }else{
+            int type = requestJson.getInteger("type");
+            String trainPath = requestJson.getString("trainPath");
+            String testPath = requestJson.getString("testPath");
+            datasetService.addDataset(new Dataset(name,type,trainPath,testPath));
+            return "ok";
+        }
     }
 }

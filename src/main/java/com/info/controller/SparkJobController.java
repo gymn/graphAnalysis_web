@@ -1,9 +1,15 @@
 package com.info.controller;
 
+import com.alibaba.fastjson.JSONObject;
+import com.info.model.Dataset;
+import com.info.service.DatasetService;
 import com.info.service.SparkService;
+import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -12,19 +18,37 @@ public class SparkJobController {
     @Autowired
     SparkService sparkService;
 
-    @RequestMapping("/tl")
+    @Autowired
+    DatasetService datasetService;
+
+    @RequestMapping(value = "/tlp",method = RequestMethod.POST)
     @ResponseBody
-    public Integer submitLinkPredictionJob(String graphFilePath, String narrowIndex, String numberOfWindows){
+    public Integer submitLinkPredictionJob(@RequestBody JSONObject requestJson){
         String mainClass = "com.hunan.tlp.TlpMain";
-        String[] args={graphFilePath,narrowIndex,numberOfWindows};
+        String name = requestJson.getString("name");
+        Dataset dataset = datasetService.getDatasetByName(name);
+        String graphFilePath = dataset.getTrainPath();
+        String testFilePath = dataset.getTestPath();
+
+        String narrowIndex = requestJson.getString("narrowIndex");
+        String numberOfWindows = requestJson.getString("numberOfWindows");
+        String[] args={graphFilePath,testFilePath, narrowIndex,numberOfWindows};
         return sparkService.invokeSparkJob(mainClass,args);
     }
 
-    @RequestMapping("/lc")
+    @RequestMapping(value = "/lcd" ,method = RequestMethod.POST)
     @ResponseBody
-    public Integer submitLocalCommunityDetectionJob(String graphFilePath,String seeds,String maxSteps,String attractThreshold){
+    public Integer submitLocalCommunityDetectionJob(@RequestBody JSONObject requestJson){
         String mainClass = "com.hunan.lcd.LcdMain";
-        String[] args = {graphFilePath,attractThreshold,maxSteps,seeds};
+        String name = requestJson.getString("name");
+        Dataset dataset = datasetService.getDatasetByName(name);
+        String graphFilePath = dataset.getTrainPath();
+        String testFilePath = dataset.getTestPath();
+
+        String attractThreshold = requestJson.getString("attractThreshold");
+        String maxSteps = requestJson.getString("maxSteps");
+        String seeds = requestJson.getString("seeds");
+        String[] args = {graphFilePath,testFilePath, attractThreshold,maxSteps,seeds};
         return sparkService.invokeSparkJob(mainClass,args);
     }
 }

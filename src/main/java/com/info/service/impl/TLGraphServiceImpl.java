@@ -15,9 +15,9 @@ import java.util.List;
 
 @Service
 public class TLGraphServiceImpl implements TLGraphService{
-    private String nodeTableName = "tl_node";
-    private String linkTableName = "tl_link";
-    private String categoryTableName = "tl_category";
+    private String nodeTableName = "tlp_node";
+    private String linkTableName = "tlp_link";
+    private String categoryTableName = "tlp_category";
 
     @Autowired
     NodeDao nodeDao;
@@ -46,7 +46,6 @@ public class TLGraphServiceImpl implements TLGraphService{
     @Override
     public Graph getGraph(Double threshold) {
         Graph graph = new Graph();
-        graph.setType("force");
 
         List<Category> categoryList = this.getCategories();
         graph.setCategories(categoryList.toArray(new Category[categoryList.size()]));

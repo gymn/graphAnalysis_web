@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.info.dao.DatasetDao">
+    <resultMap id="DatasetMap" type="com.info.model.Dataset">
+        <result property="type" column="type"/>
+        <result property="name" column="name"/>
+        <result property="trainPath" column="train_path"/>
+        <result property="testPath" column="test_path"/>
+    </resultMap>
+
+    <!-- 根据type获取数据集名称 -->
+    <select id="getAllDatasetName" resultType="java.lang.String">
+        SELECT name FROM dataset WHERE type = #{type}
+    </select>
+
+    <!-- 根据name获取数据集对象 -->
+    <select id="getDatasetByName" resultType="com.info.model.Dataset" resultMap="DatasetMap">
+        SELECT type,name,train_path,test_path FROM dataset where name = #{name}
+    </select>
+
+    <!-- 插入一个Dataset -->
+    <insert id="addDataset" parameterType="com.info.model.Dataset">
+        INSERT INTO dataset
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null">
+                type,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="trainPath != null">
+                train_path,
+            </if>
+            <if test="testPath != null">
+                test_path
+            </if>
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="name!=null">
+                #{name},
+            </if>
+            <if test="trainPath != null">
+                #{trainPath},
+            </if>
+            <if test="testPath != null">
+                #{testPath}
+            </if>
+        </trim>
+    </insert>
+
+    <delete id="deleteDataset" parameterType="java.lang.String">
+        DELETE FROM dataset
+        WHERE name = #{name}
+    </delete>
+</mapper>

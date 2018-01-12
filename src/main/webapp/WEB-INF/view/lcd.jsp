@@ -1,3 +1,5 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page isELIgnored="false" %>
 <%--
   Created by IntelliJ IDEA.
   User: hunan
@@ -6,7 +8,10 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<%
+    String path = request.getContextPath();
+    String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+%>
 <div class="tab-pane fade" id="community">
     <div class="modal fade" id="lcd-add-modal" tabindex="-1" role="dialog" aria-labelledby="lcd-ModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -22,16 +27,16 @@
                 <div class="modal-body">
                     <form role="form">
                         <div class="form-group">
-                            name<input class="form-control" type="text"/>
-                            train<input class="form-control" type="text"/>
-                            test<input class="form-control" type="text"/>
+                            name<input class="form-control" id="lcd-ds-name" type="text"/>
+                            train<input class="form-control" id="lcd-ds-train" type="text"/>
+                            test<input class="form-control" id="lcd-ds-test" type="text"/>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close
                     </button>
-                    <button type="button" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" onclick="addDataSet('lcd',1)">
                         Add
                     </button>
                 </div>
@@ -52,12 +57,11 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation">
-                                    <a role="menuitem" onclick="setDataSet('dataset-lcd',this)">Karate</a>
-                                </li>
-                                <li role="presentation">
-                                    <a role="menuitem" onclick="setDataSet('dataset-lcd',this)">Jazz</a>
-                                </li>
+                                <c:forEach items="${lcdDatasetList}" var="datasetName">
+                                        <li role="presentation">
+                                            <a role="menuitem" onclick="setDataSet('dataset-lcd',this)">${datasetName}</a>
+                                        </li>
+                                </c:forEach>
                             </ul>
                         </div>
                         <button type="button" class="btn btn-info " data-toggle="modal" data-target="#lcd-add-modal">
@@ -70,7 +74,7 @@
                         <div>Max steps for community center search<br><input class="form-control" type="number" id="maxSteps" value="1" step="1"></div>
                         <div>Gravitation threshold<br><input class="form-control" type="number" id="attractThreshold" min="0.1" max="1.0" step="0.1" value="0.8"></div>
                         <button type="button" class="btn btn-primary btn-block glyphicon glyphicon-refresh" onclick="callCommunity()">Perform calculation</button>
-                        <img src="../resources/img/wait.gif" id="wait-2">
+                        <img src="<%=basePath%>resources/img/wait.gif" id="wait-2">
                     </div>
                 </form><br>
                 <div>
@@ -117,3 +121,61 @@
         </div>
     </div>
 </div>
+
+<script>
+    function callCommunity() {
+        if($("#dataset-lcd").attr("selected")) {
+            $('#wait-2').show();
+            var name = $('#dataset-lcd').text();
+            var seeds = $('#seeds').val();
+            var maxSteps = $('#maxSteps').val();
+            var attractThreshold = $('#attractThreshold').val();
+            var data={
+                name: name,
+                seeds: seeds,
+                maxSteps: maxSteps,
+                attractThreshold: attractThreshold
+            };
+            $.ajax({
+                "type":"POST",
+                "url": "<%=basePath%>spark/lcd",
+                'contentType' : 'application/json',
+                'data':JSON.stringify(data),
+                "success": function (data) {
+                $('#wait-2').hide();
+                alert(data);
+            }});
+        }else{
+            alert("No dataset selected!")
+        }
+    }
+
+    function drawPanel2(panelId) {
+        var layout = '';
+        var radio = document.getElementsByName("graph-layout-2");
+        for (var i = 0; i < radio.length; i++) {
+            if (radio[i].checked === true) {
+                layout = radio[i].value;
+                break;
+            }
+        }
+
+        var type = '';
+        var nodeTypeRadio = document.getElementsByName("node-type-2");
+        for (var j = 0; j < nodeTypeRadio.length; j++) {
+            if (nodeTypeRadio[j].checked === true) {
+                type = nodeTypeRadio[j].value;
+                break;
+            }
+        }
+
+        var dataset = $("#dataset-lcd").text()
+        $.getJSON("<%=basePath%>file/lcd/data",{nodeType: type, dataset: dataset},function (data) {
+            drawGraph(data.graph,panelId,layout);
+            drawGraph(data.testGraph,panelId+'-test',layout);
+            $("#lcd-precision").text(data.metrics.precision);
+            $("#lcd-recall").text(data.metrics.recall);
+            $("#lcd-f").text(data.metrics.f);
+        });
+    }
+</script>

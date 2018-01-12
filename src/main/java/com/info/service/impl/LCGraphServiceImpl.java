@@ -12,9 +12,9 @@ import java.util.List;
 
 @Service
 public class LCGraphServiceImpl implements LCGraphService {
-    private String nodeTableName = "lc_node";
-    private String linkTableName = "lc_link";
-    private String categoryTableName = "lc_category";
+    private String nodeTableName = "lcd_node";
+    private String linkTableName = "lcd_link";
+    private String categoryTableName = "lcd_category";
 
     @Autowired
     NodeDao nodeDao;
@@ -43,7 +43,6 @@ public class LCGraphServiceImpl implements LCGraphService {
     @Override
     public Graph getGraph(LCNodeType type) {
         Graph graph = new Graph();
-        graph.setType("force");
 
         List<Category> categoryList = categoryDao.getCategoryList(categoryTableName);
         graph.setCategories(categoryList.toArray(new Category[categoryList.size()]));

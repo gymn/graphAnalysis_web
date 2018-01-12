@@ -8,7 +8,7 @@ public interface CommonGraphService {
      * 获取整个图
      * @return
      */
-    public Graph getGraph(String tableName);
+    public Graph getTestGraph(String panel);
 
     /**
      * 计算时序链路预测AUC和准确率

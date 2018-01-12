@@ -13,10 +13,10 @@
 <html>
 <head>
     <title>Complex Network Analytics</title>
-    <link rel="stylesheet" href="../resources/css/bootstrap.min.css">
-    <script src="../resources/js/jquery-3.1.1.min.js"></script>
-    <script src="../resources/js/bootstrap.min.js"></script>
-    <script src="../resources/js/echarts.min.js"></script>
+    <link rel="stylesheet" href="<%=basePath%>resources/css/bootstrap.min.css">
+    <script src="<%=basePath%>resources/js/jquery-3.1.1.min.js"></script>
+    <script src="<%=basePath%>resources/js/bootstrap.min.js"></script>
+    <script src="<%=basePath%>resources/js/echarts.min.js"></script>
 
 </head>
 <body style="padding-top: 5px;">
@@ -55,107 +55,59 @@
             $('#wait-2').hide();
             var range = document.getElementById("range-1");
             var rangeMax = document.getElementById("range-max");
-            $.get("<%=basePath%>file/maxWeight",function (data) {
+            $.get("<%=basePath%>file/tlp/maxWeight",function (data) {
                 range.setAttribute("max", data);
                 rangeMax.innerText=data;
             });
+
+            $.get()
         };
 
+        function addDataSet(typeName,code) {
+            var name = $("#"+typeName+"-ds-name").val();
+            if(name==='')
+                alert("Unspecified name!");
+            var trainPath = $("#"+typeName+"-ds-train").val();
+            if(trainPath==='')
+                alert("Unspecified train data path!");
+            var testPath = $("#"+typeName+"-ds-test").val();
+            if(testPath==='')
+                alert("Unspecified test data path!");
+
+            var data = {
+                name:name,
+                trainPath:trainPath,
+                testPath:testPath,
+                type:code
+            };
+
+            $.ajax({
+                    'type':'POST',
+                    'url': "<%=basePath%>file/dataset/add",
+                'contentType' : 'application/json',
+                'data':JSON.stringify(data),
+                'success':function (data) {
+                    if(data==='no'){
+                        alert("Failed to add existed data set name!");
+                    }else{
+                        if(code===0){
+                            var ps = document.createElement("li");
+                            ps.setAttribute("role","presentation");
+                            ps.innerHTML = '<a role="menuitem" onclick="setDataSet(\'dataset-tlp\',this)">'+name+'</a>';
+                            $("#link ul").append(ps);
+                        }else if(code===1){
+                            var ps = document.createElement("li");
+                            ps.setAttribute("role","presentation");
+                            $("#community ul").append(ps);
+                            ps.innerHTML = '<a role="menuitem" onclick="setDataSet(\'dataset-lcd\',this)">'+name+'</a>';
+                        }
+                        $("#"+typeName+"-add-modal").modal('hide');
+                    }
+                }});
+        }
         function setDataSet(dsId,obj){
             $("#"+dsId).text(obj.innerText);
             $("#"+dsId).attr("selected",true);
-        }
-
-        function callLink() {
-            $('#wait-1').show();
-            var graphFilePath = $('#file-1').val();
-            var narrowIndex = document.getElementById("narrowIndex").value;
-            var numberOfWindows = document.getElementById("numberOfWindows").value;
-            $.get("<%=basePath%>spark/tl",{graphFilePath:graphFilePath,narrowIndex:narrowIndex,numberOfWindows:numberOfWindows},function (data) {
-                $('#wait-1').hide();
-                alert(data);
-                //设置阈值控制组件
-                var range = document.getElementById("range-1");
-                var rangeMax = document.getElementById("range-max");
-                $.get("<%=basePath%>file/maxWeight",function (data) {
-                    range.setAttribute("max", data);
-                    rangeMax.innerText=data;
-                });
-            });
-        }
-
-        function callCommunity() {
-            $('#wait-2').show();
-            var graphFilePath = $('#file-2').val();
-            var seeds = $('#seeds').val();
-            var maxSteps = $('#maxSteps').val();
-            var attractThreshold = $('#attractThreshold').val();
-
-            $.get("<%=basePath%>spark/lc",{graphFilePath:graphFilePath,seeds:seeds,maxSteps:maxSteps,attractThreshold:attractThreshold},function (data) {
-                $('#wait-2').hide();
-                alert(data);
-            })
-        }
-
-        function showCurrentRangeValue(){
-            document.getElementById("range-value").innerText=document.getElementById("range-1").value;
-        }
-
-        function drawPanel1(panelId) {
-            var layout = '';
-            var radio = document.getElementsByName("graph-layout-1");
-            for (var i = 0; i < radio.length; i++) {
-                if (radio[i].checked === true) {
-                    layout = radio[i].value;
-                    break;
-                }
-            }
-
-            if($("#dataset-tlp").attr("selected")) {
-                var rangeValue = document.getElementById("range-1").value;
-                var dataset = $("#dataset-tlp").text()
-                $.getJSON("<%=basePath%>file/tlp/data", {threshold: rangeValue, dataset: dataset}, function (data) {
-                    drawGraph(data.graph,panelId,layout);
-                    drawGraph(data.testGraph,panelId+"-test",layout);
-                    $("#tlp-precision").text(data.metrics.precision);
-                    $("#tlp-auc").text(data.metrics.auc);
-                });
-            }else{
-                alert("No dataset selected!")
-            }
-        }
-
-        function drawPanel2(panelId) {
-            if($("#dataset-lcd").attr("selected")) {
-                var layout = '';
-                var radio = document.getElementsByName("graph-layout-2");
-                for (var i = 0; i < radio.length; i++) {
-                    if (radio[i].checked === true) {
-                        layout = radio[i].value;
-                        break;
-                    }
-                }
-
-                var type = '';
-                var nodeTypeRadio = document.getElementsByName("node-type-2");
-                for (var j = 0; j < nodeTypeRadio.length; j++) {
-                    if (nodeTypeRadio[j].checked === true) {
-                        type = nodeTypeRadio[j].value;
-                        break;
-                    }
-                }
-
-                var dataset = $("#dataset-lcd").text()
-                $.getJSON("<%=basePath%>file/lcd/data",{nodeType: type, dataset: dataset},function (data) {
-                    drawGraph(data.graph,panelId,layout);
-                    drawGraph(data.testGraph,panelId+'-test',layout);
-                    $("#lcd-precision").text(data.metrics.precision);
-                    $("#lcd-recall").text(data.metrics.recall);
-                    $("#lcd-f").text(data.metrics.f);
-                });
-            }else{
-                alert("No dataset selected!")
-            }
         }
 
         function drawGraph(graphData ,panelId, layout){
